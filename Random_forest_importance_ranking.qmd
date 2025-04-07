@@ -1,0 +1,57 @@
+```{r}
+
+library(ggplot2)
+library(tidyverse)
+library(randomForest)
+library(rfUtilities)
+library(rfPermute)
+```
+
+Read data
+
+```{r}
+mydata <- read.csv(file.choose(),header = T)
+```
+
+Build a model to check the accuracy of model classification
+
+```{r}
+
+set.seed(123)
+treat_rf <- randomForest(NP ~ ., data= mydata,importance=TRUE,proximity=TRUE)
+treat_rf
+```
+
+Further examine the significance level of the model through permutation testing
+
+```{r}
+
+set.seed(123)
+treat_perm <- rf.significance(treat_rf, mydata, nperm=99, ntree=500)
+treat_perm
+```
+
+Test the importance of each variable in sequence and plot it
+
+```{r}
+
+set.seed(123)
+ANPP_rfP<- rfPermute(NP ~ ., data = mydata, ntree = 500,
+                     na.action = na.omit, nrep = 100,num.cores = 1)
+ANPP_dat <- importance(ANPP_rfP, sort.by = NULL, decreasing = TRUE)
+ANPP_dat %>%
+  as_tibble(rownames = "names") %>%
+  data.frame() %>%
+  mutate(label = if_else(X.IncMSE.pval < 0.001,"***",
+                         if_else(X.IncMSE.pval <0.01,"**",
+                                 if_else(X.IncMSE.pval<0.05,"*","ns"))),
+         X.IncMSE = as.numeric(X.IncMSE)) %>%
+  arrange(X.IncMSE) %>%
+  mutate(group = if_else(label=="ns","In_sig","Sig"),
+         names = forcats::fct_inorder(names)) %>%
+  ggplot(aes(x = names, y = X.IncMSE))+
+  geom_bar(aes(fill = group),stat = "identity")+
+  geom_text(aes(y = X.IncMSE + 1,label = label))+
+  labs(x = "", y = "%IncMSE")+
+  coord_flip()
+```

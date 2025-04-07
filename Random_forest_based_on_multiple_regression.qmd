@@ -1,0 +1,151 @@
+
+
+```{r}
+library(psych)
+library(reshape2)
+library(ggplot2) 
+library(randomForest)
+library(patchwork)
+library(openxlsx) 
+```
+
+```{r}
+myro <- as.data.frame(df<-read.xlsx('./YL.xlsx',sheet = 1))
+spearman <- corr.test(myro[,2:6], myro[,7:23], method = 'spearman', adjust = 'none')#Take the corresponding column and calculate the correlation coefficient
+spearman #View the correlation coefficient matrix
+#Organize the results for easy visualization
+r <- data.frame(spearman$r)  #Obtain R2
+r$myro <- rownames(r)
+r <- melt(r, id = 'myro')
+spearman <- cbind(r)
+spearman#View the new data box reconstructed with r value
+#The above code is to process the correlation coefficient matrix into a 3-column data box
+p1 <- ggplot() +
+  geom_tile(data = spearman, aes(x = variable, y = myro, fill = value)) +
+  scale_fill_gradientn(colors = c('#2D6DB1', 'white', '#DC1623'), limit = c(-1, 1)) +
+  theme(panel.grid = element_blank(), panel.background = element_rect(color = 'black'), legend.key = element_blank(), 
+        axis.text.x = element_text(color = 'black', angle =45, hjust = 1, vjust = 1), axis.text.y = element_text(color = 'black'), axis.ticks = element_line(color = 'black')) +
+  scale_x_discrete(expand = c(0, 0)) +
+  scale_y_discrete(expand = c(0, 0)) +
+  labs(y = '', x = '', fill = 'Correlation')
+
+p1#View the relevant heat map drawn above
+```
+#Flameheight	Flamelength	Flamewidth	Flameinclination angle	Firelineintensity 	Fuelconsumption	Combustionefficiency 	Maximumflametemperature	Residencetime	Spreadspeed	CO	CO2	PM1	PM2.5	PM4	PM10	TOTALPM
+
+
+```{r}
+ #Calculate the important values of physical and chemical properties one by one
+set.seed(123)
+Flameheight <- randomForest(Flameheight~Humidity+Temperature+Windspeed+Moisturecontent+Load, data =myro, importance = TRUE, ntree = 500)
+Flamelength <- randomForest(Flameheight~Humidity+Temperature+Windspeed+Moisturecontent+Load, data =myro, importance = TRUE, ntree = 500)
+Flamewidth <- randomForest(Flameheight~Humidity+Temperature+Windspeed+Moisturecontent+Load, data =myro, importance = TRUE, ntree = 500)
+Flameinclinationangle <- randomForest(Flameheight~Humidity+Temperature+Windspeed+Moisturecontent+Load, data =myro, importance = TRUE, ntree = 500)
+Firelineintensity <- randomForest(Flameheight~Humidity+Temperature+Windspeed+Moisturecontent+Load, data =myro, importance = TRUE, ntree = 500)
+Fuelconsumption <- randomForest(Flameheight~Humidity+Temperature+Windspeed+Moisturecontent+Load, data =myro, importance = TRUE, ntree = 500)
+Combustionefficiency <- randomForest(Flameheight~Humidity+Temperature+Windspeed+Moisturecontent+Load, data =myro, importance = TRUE, ntree = 500)
+Maximumflametemperature <- randomForest(Flameheight~Humidity+Temperature+Windspeed+Moisturecontent+Load, data =myro, importance = TRUE, ntree = 500)
+Residencetime <- randomForest(Flameheight~Humidity+Temperature+Windspeed+Moisturecontent+Load, data =myro, importance = TRUE, ntree = 500)
+Spreadspeed <- randomForest(Flameheight~Humidity+Temperature+Windspeed+Moisturecontent+Load, data =myro, importance = TRUE, ntree = 500)
+CO <- randomForest(Flameheight~Humidity+Temperature+Windspeed+Moisturecontent+Load, data =myro, importance = TRUE, ntree = 500)
+CO2 <- randomForest(Flameheight~Humidity+Temperature+Windspeed+Moisturecontent+Load, data =myro, importance = TRUE, ntree = 500)
+PM1 <- randomForest(Flameheight~Humidity+Temperature+Windspeed+Moisturecontent+Load, data =myro, importance = TRUE, ntree = 500)
+PM2.5 <- randomForest(Flameheight~Humidity+Temperature+Windspeed+Moisturecontent+Load, data =myro, importance = TRUE, ntree = 500)
+PM4 <- randomForest(Flameheight~Humidity+Temperature+Windspeed+Moisturecontent+Load, data =myro, importance = TRUE, ntree = 500)
+PM10 <- randomForest(Flameheight~Humidity+Temperature+Windspeed+Moisturecontent+Load, data =myro, importance = TRUE, ntree = 500)
+TOTALPM <- randomForest(Flameheight~Humidity+Temperature+Windspeed+Moisturecontent+Load, data =myro, importance = TRUE, ntree = 500)
+CSY_forest#Using CSY1 forest as an example to view the regression calculation results of CSY1
+```
+
+```{r}
+# Use the importance() function to view the standardized score representing the importance of each predictor variable
+Yield <- data.frame(importance(Yield_forest, scale = TRUE), check.names = FALSE)
+Ash <- data.frame(importance(Ash_forest, scale = TRUE), check.names = FALSE)
+TC <- data.frame(importance(TC_forest, scale = TRUE), check.names = FALSE)
+TN <- data.frame(importance(TN_forest, scale = TRUE), check.names = FALSE)
+TH <- data.frame(importance(TH_forest , scale = TRUE), check.names = FALSE)
+TO <- data.frame(importance(TO_forest, scale = TRUE), check.names = FALSE)
+TS <- data.frame(importance(TS_forest, scale = TRUE), check.names = FALSE)
+HHV <- data.frame(importance(HHV_forest , scale = TRUE), check.names = FALSE)
+AFCV <- data.frame(importance(AFCV_forest, scale = TRUE), check.names = FALSE)
+H.C <- data.frame(importance(H.C_forest, scale = TRUE), check.names = FALSE)
+O.C <- data.frame(importance(O.C_forest, scale = TRUE), check.names = FALSE)
+N.C <- data.frame(importance(N.C_forest, scale = TRUE), check.names = FALSE)
+TIOC <- data.frame(importance(TIOC_forest, scale = TRUE), check.names = FALSE)
+StableC <- data.frame(importance(StableC_forest, scale = TRUE), check.names = FALSE)
+LabileC <- data.frame(importance(LabileC_forest , scale = TRUE), check.names = FALSE)
+CN <- data.frame(importance(CN_forest, scale = TRUE), check.names = FALSE)
+TDOC <- data.frame(importance(TDOC_forest, scale = TRUE), check.names = FALSE)
+CCS <- data.frame(importance(CCS_forest , scale = TRUE), check.names = FALSE)
+CHS <- data.frame(importance(CHS_forest, scale = TRUE), check.names = FALSE)
+CAS <- data.frame(importance(CAS_forest, scale = TRUE), check.names = FALSE)
+AN <- data.frame(importance(AN_forest , scale = TRUE), check.names = FALSE)
+NN <- data.frame(importance(NN_forest, scale = TRUE), check.names = FALSE)
+AP <- data.frame(importance(AP_forest, scale = TRUE), check.names = FALSE)
+pH <- data.frame(importance(pH_forest, scale = TRUE), check.names = FALSE)
+EC <- data.frame(importance(EC_forest, scale = TRUE), check.names = FALSE)
+CEC <- data.frame(importance(CEC_forest, scale = TRUE), check.names = FALSE)
+CSY <- data.frame(importance(CSY_forest, scale = TRUE), check.names = FALSE)
+A <- data.frame(importance(A_forest , scale = TRUE), check.names = FALSE)
+B <- data.frame(importance(B_forest, scale = TRUE), check.names = FALSE)
+C <- data.frame(importance(C_forest, scale = TRUE), check.names = FALSE)
+D <- data.frame(importance(D_forest , scale = TRUE), check.names = FALSE)
+E <- data.frame(importance(E_forest, scale = TRUE), check.names = FALSE)
+F <- data.frame(importance(F_forest, scale = TRUE), check.names = FALSE)
+G <- data.frame(importance(G_forest , scale = TRUE), check.names = FALSE)
+H <- data.frame(importance(H_forest, scale = TRUE), check.names = FALSE)
+I <- data.frame(importance(I_forest, scale = TRUE), check.names = FALSE)
+StableC#View the composition of important values
+IMportance_t <- data.frame(cbind(Yield$`%IncMSE`, Ash$`%IncMSE`,TC$`%IncMSE`,TN$`%IncMSE`,TH$`%IncMSE`,TO$`%IncMSE`,TS$`%IncMSE`,HHV$`%IncMSE`,AFCV$`%IncMSE`,H.C$`%IncMSE`,O.C$`%IncMSE`,N.C$`%IncMSE`,TIOC$`%IncMSE`,StableC$`%IncMSE`,LabileC$`%IncMSE`,CN$`%IncMSE`,TDOC$`%IncMSE`,CCS$`%IncMSE`,CHS$`%IncMSE`, CAS$`%IncMSE`,AN$`%IncMSE`,NN$`%IncMSE`,AP$`%IncMSE`,pH$`%IncMSE`,EC$`%IncMSE`,CEC$`%IncMSE`,CSY$`%IncMSE`,A$`%IncMSE`,B$`%IncMSE`,C$`%IncMSE`,D$`%IncMSE`,E$`%IncMSE`,F$`%IncMSE`,G$`%IncMSE`,H$`%IncMSE`,I$`%IncMSE`))
+colnames(IMportance_t) <- c('Yield', 'Ash', 'TC', 'TN',"TH","TO","TS","HHV","AFCV","H.C", 'O.C', 'N.C','TIOC',"StableC","LabileC","CN","TDOC","CCS","CHS",'CAS','AN','NN',"AP","pH","EC","CEC","CSY","A", 'B','C','D',"E","F","G","H","I")#Naminge row name
+rownames(IMportance_t) <- c('I', 'H', 'G','F',"E","D","C","B","A")#Naming column names
+IMportance_t[IMportance_t<0] <- 0#Filter all items with importance below 0
+IMportance_t[is.na(IMportance_t)] <- 0#Assign a null value to 0
+write.csv(IMportance_t,file = "IMportance_t1.CSV")#Write important data to the default path
+```
+
+```{r}
+measure_name=setdiff(colnames(IMportance_t),
+                     c('Items'))#Assign a one to many value according to the first column
+IMportance_t$Items<-row.names(IMportance_t)
+#Organize the results for ease of plotting
+data1=melt(IMportance_t ,
+           id.vars='Items', 
+           measure.vars=measure_name,
+           variable.name = "sample", 
+           value.name = "expr")
+p <- p1+geom_point(data = data1, aes(x = sample, y = Items, size = expr*1), shape = 1, stroke=1.5) +
+  scale_size_continuous(range = c(0,10)) +#Control the size of the circle
+  labs(size = 'Importance (%)')#Add circles on the heatmap
+p#View drawing results
+ggsave("./Lglh22.pdf",p,width=20, height=5)
+```
+
+```{r}
+#Splicing the bar chart above
+exp <- as.data.frame(df<-read.xlsx('./.xlsx',sheet = 1))
+exp
+p2 <- ggplot(exp, aes(xx, xx)) +
+  geom_col(fill = "steelblue") +
+  theme_bw() +
+  theme_classic()+
+  theme(panel.grid.major =element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(),
+        axis.title.x = element_blank(),
+        axis.text.x = element_blank())+coord_cartesian(ylim = c(-120, 50))+
+  ylab("Explained variation(%)")
+p2
+```
+
+```{r}
+write.xlsx(IMportance_t,"./important.xlsx")
+```
+
+```{r}
+spearman <- corr.test(myro[,2:10], myro[,11:46], method = 'spearman', adjust = 'BH')#取相应的列并计算相关系数
+r <- data.frame(spearman$r)
+```
+
+```{r}
+write.xlsx(r,"./r.xlsx")
+```

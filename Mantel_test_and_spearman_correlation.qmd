@@ -1,0 +1,297 @@
+```{r}
+library(openxlsx)
+library(tidyverse)
+library(ggplot2)
+#library(ggcor)
+library(linkET)
+library(patchwork)
+```
+
+```{r}
+# Read a xlsx file
+df<-read.xlsx('./wlx.xlsx',sheet = 5)
+```
+
+```{r}
+df$Specie
+```
+
+```{r}
+unique(df$Specie)
+```
+
+# calculation
+
+```{r}
+# 1: Larix gmelinii；2：Pinus sylvestris var. mongholica；3：Mongolian oak；
+# 4：Fraxinus mandshurica Rupr.
+# df1<-df %>%
+# After changing the name of this item, perform the corresponding program below
+# df %>% filter(Specie == "XXX")
+Y<-df[-1:-3]
+X<-df[2:3]
+# Mantel_test tests the correlation between Y and X, and spec_delect is the 
+# set of multiple variables (columns) in X. Y and X can refer to the dependent 
+#　variable and independent variable, or they can be different
+mantel <- mantel_test(X, Y, mantel_fun = "mantel.randtest",
+                      spec_select = list( temp = 1, time  = 2)) %>% 
+  mutate(rd = cut(r, breaks = c(-Inf, 0.25, 0.5, Inf),
+                  labels = c("< 0.25", "0.25 - 0.5", ">= 0.5")),
+         pd = cut(p, breaks = c(-Inf, 0.01, 0.05, Inf),
+                  labels = c("< 0.01", "0.01 - 0.05", ">= 0.05")))
+cY<-correlate(Y,method = 'spearman')
+```
+
+# P1 Larix gmelinii
+
+```{r}
+p1 <- qcorrplot(cY, type = "lower", diag = FALSE) +
+  # title
+  labs(title = "Larix gmelinii") +
+  # circle2，square
+  ggcor::geom_square() +
+  geom_mark(
+    size = 2.5,
+    sig_level = c(0.05, 0.01, 0.001),
+    sig_thres = 0.05,
+    only_mark = TRUE,
+    color = "pink"
+  ) +
+  geom_couple(
+    aes(colour = pd, size = rd),
+    data = mantel,
+    nudge_x = 0.5,
+    label.size = 5,
+    label.family = "serif",
+    curvature = nice_curvature()
+  ) +
+  scale_fill_gradientn(colours =  rev(RColorBrewer::brewer.pal(11, "RdBu")),
+                       limits=c(-1,1))+
+  scale_size_manual(values = c(0.5, 1, 2)) +
+  # Set the color grouping of the lines, according to the mantle test results, 
+  # groups are 2 and 3 groups are 3
+  scale_colour_manual(values = color_pal(3)) +
+  guides(
+    colour = guide_legend(
+      title = "Mantel's p",
+      override.aes = list(size = 0.5),
+      order = 1,
+      direction = "vertical"
+    ),
+    size = guide_legend(
+      title = "Mantel's r",
+      override.aes = list(size = 0.5),
+      order = 2,
+      direction = "vertical"
+    ),
+    fill = guide_colorbar(
+      title = "Spearman's r",
+      override.aes = list(size = 0.5),
+      order = 3,
+      direction = "vertical"
+    )
+  ) +
+  theme(
+    text = element_text(family = 'serif'),
+    legend.position = "right",
+    legend.title = element_text(size = 10),
+    legend.text = element_text(size = 8),
+    #legend.box="vertical",
+    axis.text = element_text(size = 10)
+  )
+p1
+ggsave("./BCLg.pdf",p1,width=10, height=8)
+```
+
+
+
+# P2 Pinus sylvestris var. mongholica
+
+```{r}
+p2 <- qcorrplot(cY, type = "lower",diag = FALSE) +
+  labs(title="Pinus sylvestris")+
+  ggcor::geom_square() +
+  geom_mark(
+    size = 2.5,
+    sig_level = c(0.05, 0.01, 0.001),
+    sig_thres = 0.05,
+    only_mark = TRUE,
+    color = "pink"
+  ) +
+  geom_couple(
+    aes(colour = pd, size = rd),
+    data = mantel,
+    nudge_x = 0.5,
+    label.size = 5,
+    label.family = "serif",
+    curvature = nice_curvature()
+  ) +
+  scale_fill_gradientn(colours =  rev(RColorBrewer::brewer.pal(11, "RdBu")),
+                       limits=c(-1,1))+
+  scale_size_manual(values = c(0.5, 1, 2)) +
+  # Set the color grouping of the lines, according to the mantle test results, 2
+  # groups are 2 and 3 groups are 3
+  scale_colour_manual(values = color_pal(3)) +
+  guides(
+    colour = guide_legend(
+      title = "Mantel's p",
+      override.aes = list(size = 0.5),
+      order = 1,
+      direction = "vertical"
+    ),
+    size = guide_legend(
+      title = "Mantel's r",
+      override.aes = list(size = 0.5),
+      order = 2,
+      direction = "vertical"
+    ),
+    fill = guide_colorbar(
+      title = "Spearman's r",
+      override.aes = list(size = 0.5),
+      order = 3,
+      direction = "vertical"
+    )
+  ) +
+  theme(
+    text = element_text(family = 'serif'),
+    legend.position = "right",
+    legend.title = element_text(size = 10),
+    legend.text = element_text(size = 8),
+    #legend.box="vertical",
+    axis.text = element_text(size = 10)
+  )
+ggsave("./BCPs.pdf",p2,width=10, height=8)
+```
+
+# P3 Mongolian oak
+
+```{r}
+p3 <- qcorrplot(cY, type = "lower",diag = FALSE) +
+  labs(title="Quercus mongolica")+
+  ggcor::geom_square() +
+  geom_mark(
+    size = 2.5,
+    sig_level = c(0.05, 0.01, 0.001),
+    sig_thres = 0.05,
+    only_mark = TRUE,
+    color = "pink"
+  ) +
+  geom_couple(
+    aes(colour = pd, size = rd),
+    data = mantel,
+    nudge_x = 0.5,
+    label.size = 5,
+    label.family = "serif",
+    curvature = nice_curvature()
+  ) +
+  scale_fill_gradientn(colours =  rev(RColorBrewer::brewer.pal(11, "RdBu")),
+                       limits=c(-1,1))+
+  scale_size_manual(values = c(0.5, 1, 2)) +
+  # Set the color grouping of the lines, according to the mantle test results, 
+  # 2 groups are 2 and 3 groups are 3
+  scale_colour_manual(values = color_pal(3)) +
+  guides(
+    colour = guide_legend(
+      title = "Mantel's p",
+      override.aes = list(size = 0.5),
+      order = 1,
+      direction = "vertical"
+    ),
+    size = guide_legend(
+      title = "Mantel's r",
+      override.aes = list(size = 0.5),
+      order = 2,
+      direction = "vertical"
+    ),
+    fill = guide_colorbar(
+      title = "Spearman's r",
+      override.aes = list(size = 0.5),
+      order = 3,
+      direction = "vertical"
+    )
+  ) +
+  theme(
+    text = element_text(family = 'serif'),
+    legend.position = "right",
+    legend.title = element_text(size = 10),
+    legend.text = element_text(size = 8),
+    #legend.box="vertical",
+    axis.text = element_text(size = 10)
+  )
+ggsave("./BCQm.pdf",p3,width=10, height=8)
+```
+
+# P4 Fraxinus mandshurica Rupr.
+
+```{r}
+p4 <- qcorrplot(cY, type = "lower",diag = FALSE) +
+  labs(title="Fraxinus mandshurica")+
+ ggcor::geom_square() +
+  geom_mark(
+    size = 2.5,
+    sig_level = c(0.05, 0.01, 0.001),
+    sig_thres = 0.05,
+    only_mark = TRUE,
+    color = "pink"
+  ) +
+  geom_couple(
+    aes(colour = pd, size = rd),
+    data = mantel,
+    nudge_x = 0.5,
+    label.size = 5,
+    label.family = "serif",
+    curvature = nice_curvature()
+  ) +
+  scale_fill_gradientn(colours =  rev(RColorBrewer::brewer.pal(11, "RdBu")),
+                       limits=c(-1,1))+
+  scale_size_manual(values = c(0.5, 1, 2)) +
+  # Set the color grouping of the lines, according to the mantle test results,
+  # 2 groups are 2 and 3 groups are 3
+  scale_colour_manual(values = color_pal(3)) +
+  guides(
+    colour = guide_legend(
+      title = "Mantel's p",
+      override.aes = list(size = 0.5),
+      order = 1,
+      direction = "vertical"
+    ),
+    size = guide_legend(
+      title = "Mantel's r",
+      override.aes = list(size = 0.5),
+      order = 2,
+      direction = "vertical"
+    ),
+    fill = guide_colorbar(
+      title = "Spearman's r",
+      override.aes = list(size = 0.5),
+      order = 3,
+      direction = "vertical"
+    )
+  ) +
+  theme(
+    text = element_text(family = 'serif'),
+    legend.position = "right",
+    legend.title = element_text(size = 10),
+    legend.text = element_text(size = 8),
+    #legend.box="vertical",
+    axis.text = element_text(size = 10)
+  )
+p4
+ggsave("./BCFm.pdf",p4,width=10, height=8)
+```
+
+```{r}
+p<-p1+p2+p3+p4+plot_annotation(tag_levels = 'A')
+```
+
+```{r}
+ggsave("./All.pdf",p,width = 16,height=12)
+```
+
+```{r}
+ggcor::quickcor(mtcars, cluster = TRUE) + ggcor::geom_square()
+```
+
+```{r}
+data("mtcars")
+```
