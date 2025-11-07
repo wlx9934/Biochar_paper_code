@@ -15,6 +15,7 @@ This repository contains the analysis codes used in the biochar paper.
 | Random_forest_baesd_on_multiple_regression.R | This code performs random forest based on multiple regression.  |
 | Random_forest_importance_ranking.R | This code performs feature importance ranking of random forest, followed by image drawing. |
 | Significance_analysis_of_differences_in_linear_models.R | This code performs test significance with difference in difference linear models.  |
+| DATA and Table S2.xlsx | This file contains the raw data for all charts and graphs.  |
 </center>
 
 If you have any questions, please contact wlx9934@163.com.
